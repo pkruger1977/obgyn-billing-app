@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="OB/GYN Codes">
+<meta name="theme-color" content="#1B2A4A">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>OB/GYN Billing Codes</title>
+<style>
+:root {
+  --navy: #1B2A4A;
+  --blue: #2C5F8A;
+  --teal: #1A8A7D;
+  --coral: #D4564E;
+  --gold: #D4A843;
+  --purple: #6B3FA0;
+  --bg: #F5F5F7;
+  --card: #FFFFFF;
+  --text: #1d1d1f;
+  --text2: #6e6e73;
+  --border: #E5E5EA;
+  --search-bg: #E5E5EA;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tab-height: 56px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  padding-top: var(--safe-top);
+  padding-bottom: calc(var(--tab-height) + var(--safe-bottom) + 8px);
+}
+
+/* ─── HEADER ─── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(245,245,247,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 8px 16px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--navy);
+  padding: 4px 0;
+}
+.header-sub {
+  font-size: 11px;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+
+/* ─── SEARCH ─── */
+.search-wrap {
+  position: relative;
+  margin-bottom: 10px;
+}
+.search-wrap svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text2);
+}
+#search {
+  width: 100%;
+  padding: 9px 36px 9px 32px;
+  border: none;
+  border-radius: 10px;
+  background: var(--search-bg);
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text);
+  outline: none;
+  -webkit-appearance: none;
+}
+#search::placeholder { color: #999; }
+#clearSearch {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #999;
+  border: none;
+  color: white;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+  display: none;
+  cursor: pointer;
+}
+
+/* ─── TABS (category filter) ─── */
+.cat-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 0 10px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.cat-tabs::-webkit-scrollbar { display: none; }
+.cat-tab {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  background: var(--search-bg);
+  color: var(--text2);
+  transition: all 0.2s;
+}
+.cat-tab.active { background: var(--navy); color: white; }
+.cat-tab[data-cat="ob"].active { background: var(--purple); }
+.cat-tab[data-cat="gyn"].active { background: var(--blue); }
+.cat-tab[data-cat="pelvic"].active { background: var(--teal); }
+.cat-tab[data-cat="uro"].active { background: var(--teal); }
+.cat-tab[data-cat="surg"].active { background: var(--coral); }
+.cat-tab[data-cat="clinic"].active { background: var(--gold); }
+.cat-tab[data-cat="combos"].active { background: var(--navy); }
+.cat-tab[data-cat="favs"].active { background: #FF3B30; }
+
+/* ─── CONTENT ─── */
+.content { padding: 0 16px 16px; }
+
+.section-header {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 10px;
+  margin: 16px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-header.ob { background: var(--purple); }
+.section-header.gyn { background: var(--blue); }
+.section-header.pelvic { background: var(--teal); }
+.section-header.uro { background: var(--teal); }
+.section-header.surg { background: var(--coral); }
+.section-header.clinic { background: var(--gold); }
+.section-header.combos { background: var(--navy); }
+
+.subsection {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  padding: 10px 0 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+/* ─── CODE CARDS ─── */
+.code-card {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: var(--card);
+  border-radius: 10px;
+  margin-bottom: 4px;
+  box-shadow: 0 0.5px 1px rgba(0,0,0,0.04);
+  transition: background 0.15s;
+  gap: 10px;
+}
+.code-card:active { background: #f0f0f2; }
+.code-left {
+  min-width: 66px;
+}
+.code-num {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.2px;
+}
+.code-fee {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 1px;
+}
+.code-mid {
+  flex: 1;
+  min-width: 0;
+}
+.code-desc {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.3;
+}
+.code-note {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 2px;
+  font-style: italic;
+}
+.fav-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+.fav-btn:active { transform: scale(1.3); }
+.fav-btn.favorited { color: #FF3B30; }
+.fav-btn:not(.favorited) { color: #ccc; }
+
+/* ─── COMBO CARDS ─── */
+.combo-card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  box-shadow: 0 0.5px 1px rgba(0,0,0,0.04);
+}
+.combo-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 3px;
+}
+.combo-codes {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.4;
+}
+
+/* ─── TIP BOX ─── */
+.tip-box {
+  background: #FFF5F5;
+  border-left: 3px solid var(--coral);
+  border-radius: 0 8px 8px 0;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.4;
+}
+.tip-box b { color: var(--coral); }
+.tip-box.teal { background: #F0FAF8; border-color: var(--teal); }
+.tip-box.teal b { color: var(--teal); }
+.tip-box.purple { background: #F5F0FA; border-color: var(--purple); }
+.tip-box.purple b { color: var(--purple); }
+
+/* ─── MODIFIER TABLE ─── */
+.mod-card {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--card);
+  border-radius: 10px;
+  margin-bottom: 4px;
+  box-shadow: 0 0.5px 1px rgba(0,0,0,0.04);
+  gap: 10px;
+}
+.mod-code {
+  min-width: 66px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.mod-desc {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text);
+}
+.mod-when {
+  font-size: 11px;
+  color: var(--text2);
+  text-align: right;
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text2);
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state h3 { font-size: 17px; color: var(--text); margin-bottom: 6px; }
+.empty-state p { font-size: 14px; }
+
+/* ─── BOTTOM TAB BAR ─── */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--tab-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(249,249,249,0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 0.5px solid var(--border);
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding-top: 4px;
+  z-index: 200;
+}
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px 12px;
+  color: var(--text2);
+  font-size: 10px;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.tab-item.active { color: var(--navy); }
+.tab-item svg { width: 22px; height: 22px; }
+
+/* ─── BACK TO TOP ─── */
+#backToTop {
+  position: fixed;
+  bottom: calc(var(--tab-height) + var(--safe-bottom) + 16px);
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: white;
+  border: none;
+  font-size: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 150;
+}
+
+/* ─── SEARCH HIGHLIGHT ─── */
+mark {
+  background: #FFEB3B;
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* ─── RESULTS COUNT ─── */
+.results-count {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text2);
+  padding: 6px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --card: #1C1C1E;
+    --text: #F5F5F7;
+    --text2: #98989D;
+    --border: #38383A;
+    --search-bg: #1C1C1E;
+  }
+  .header { background: rgba(0,0,0,0.85); }
+  .tab-bar { background: rgba(28,28,30,0.94); }
+  #search { background: #2C2C2E; color: #F5F5F7; }
+  .code-card:active { background: #2C2C2E; }
+  .tip-box { background: #1C1C1E; }
+  .tip-box.teal { background: #1C1C1E; }
+  .tip-box.purple { background: #1C1C1E; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1 id="headerTitle">OB/GYN Codes</h1>
+  <div class="header-sub">AHCIP &bull; SOMB March 2025 &bull; Alberta</div>
+  <div class="search-wrap">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="search" id="search" placeholder="Search codes, procedures, keywords..." autocomplete="off" autocorrect="off" spellcheck="false">
+    <button id="clearSearch" onclick="clearSearch()">&times;</button>
+  </div>
+  <div class="cat-tabs" id="catTabs">
+    <button class="cat-tab active" data-cat="all" onclick="filterCat('all',this)">All</button>
+    <button class="cat-tab" data-cat="favs" onclick="filterCat('favs',this)">Favorites</button>
+    <button class="cat-tab" data-cat="clinic" onclick="filterCat('clinic',this)">Clinic</button>
+    <button class="cat-tab" data-cat="ob" onclick="filterCat('ob',this)">OB</button>
+    <button class="cat-tab" data-cat="gyn" onclick="filterCat('gyn',this)">Gyne</button>
+    <button class="cat-tab" data-cat="pelvic" onclick="filterCat('pelvic',this)">Pelvic Floor</button>
+    <button class="cat-tab" data-cat="uro" onclick="filterCat('uro',this)">Urology</button>
+    <button class="cat-tab" data-cat="surg" onclick="filterCat('surg',this)">Gen Surg</button>
+    <button class="cat-tab" data-cat="combos" onclick="filterCat('combos',this)">Combos</button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content" id="content"></div>
+
+<!-- BACK TO TOP -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-item active" onclick="switchView('codes',this)">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    Codes
+  </button>
+  <button class="tab-item" onclick="switchView('combos',this)">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+    Combos
+  </button>
+  <button class="tab-item" onclick="switchView('modifiers',this)">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+    Modifiers
+  </button>
+  <button class="tab-item" onclick="switchView('rules',this)">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    Rules
+  </button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════════
+const ALL_CODES = [
+// ── CLINIC ──
+{cat:"clinic",sub:"OB Visits",code:"03.08B",desc:"OB Consult (initial referral)",fee:"71.61",note:"CMXC 30"},
+{cat:"clinic",sub:"OB Visits",code:"03.04B",desc:"1st Prenatal Visit (no referral)",fee:"101.93",note:"CMXC 30"},
+{cat:"clinic",sub:"OB Visits",code:"03.03B",desc:"Prenatal Visit (subsequent)",fee:"9.64",note:"CMXV 20"},
+{cat:"clinic",sub:"OB Visits",code:"03.07C",desc:"Repeat OB Consult",fee:"61.04",note:"CMXC 30"},
+{cat:"clinic",sub:"OB Visits",code:"03.03C",desc:"Postpartum Check",fee:"9.69",note:"CMXV 20"},
+{cat:"clinic",sub:"Gyne Visits",code:"03.08A",desc:"Gyne Consult (initial referral)",fee:"74.25",note:"CMXC 30"},
+{cat:"clinic",sub:"Gyne Visits",code:"03.04A",desc:"1st Gyne Visit (no referral)",fee:"70.08",note:"CMXC 30"},
+{cat:"clinic",sub:"Gyne Visits",code:"03.03A",desc:"Minor Gyne Visit",fee:"45.08",note:"CMXV 20"},
+{cat:"clinic",sub:"Gyne Visits",code:"03.07B",desc:"Repeat Gyne Consult",fee:"33.66",note:"CMXV 20"},
+{cat:"clinic",sub:"Gyne Visits",code:"03.07A",desc:"Minor Consultation",fee:"31.51",note:"CMXV 20"},
+{cat:"clinic",sub:"Hospital",code:"03.04C",desc:"Admission",fee:"58.47",note:"+ modifiers: HAEV/HAEVWK/HANTPM/HANTAM"},
+{cat:"clinic",sub:"Hospital",code:"03.03D",desc:"Hospital Visit",fee:"",note:""},
+{cat:"clinic",sub:"Hospital",code:"03.03AR",desc:"Urgent Inpatient CB (>20 min)",fee:"41.43",note:"COINPT add-on"},
+{cat:"clinic",sub:"Pre-Op & Admin",code:"03.04M",desc:"Pre-Op Medical",fee:"",note:""},
+{cat:"clinic",sub:"Pre-Op & Admin",code:"03.05JA",desc:"Patient Handover (OB)",fee:"",note:""},
+{cat:"clinic",sub:"Pre-Op & Admin",code:"03.05JD",desc:"Handover (Gyne)",fee:"",note:""},
+{cat:"clinic",sub:"Pre-Op & Admin",code:"03.05JP",desc:"Phone Family",fee:"",note:""},
+{cat:"clinic",sub:"Pre-Op & Admin",code:"03.01AD",desc:"E-Communication (per 5 min)",fee:"",note:""},
+{cat:"clinic",sub:"Pre-Op & Admin",code:"03.01S",desc:"Health Mail Communication",fee:"",note:""},
+{cat:"clinic",sub:"Pre-Op & Admin",code:"03.05JR",desc:"Call to Patient",fee:"8.12",note:""},
+{cat:"clinic",sub:"Phone: Outpatient",code:"03.01LM",desc:"Outpatient 0700-1700 M-F",fee:"13.41",note:""},
+{cat:"clinic",sub:"Phone: Outpatient",code:"03.01LN",desc:"Outpatient 1700-2200 M-F",fee:"26.16",note:""},
+{cat:"clinic",sub:"Phone: Outpatient",code:"03.01LO",desc:"Outpatient 0700-2200 Wk/Stat",fee:"30.29",note:""},
+{cat:"clinic",sub:"Phone: Inpatient",code:"03.01NG",desc:"Inpatient 0700-1700 M-F",fee:"10.19",note:""},
+{cat:"clinic",sub:"Phone: Inpatient",code:"03.01NH",desc:"Inpatient 1700-2200 M-F",fee:"20.28",note:""},
+{cat:"clinic",sub:"Phone: Inpatient",code:"03.01NI",desc:"Inpatient 0700-2200 Wk/Stat",fee:"23.94",note:""},
+{cat:"clinic",sub:"Phone: Consultant",code:"03.01LJ",desc:"Consultant 0700-1700 M-F",fee:"16.45",note:""},
+{cat:"clinic",sub:"Phone: Consultant",code:"03.01LK",desc:"Consultant 1700-2200 M-F",fee:"113.40",note:""},
+{cat:"clinic",sub:"Phone: Consultant",code:"03.01LL",desc:"Consultant 0700-2200 Wk/Stat",fee:"41.42",note:""},
+{cat:"clinic",sub:"Phone: Referring",code:"03.01LG",desc:"Referring 0700-1700 M-F",fee:"34.43",note:""},
+{cat:"clinic",sub:"Phone: Referring",code:"03.01LH",desc:"Referring 1700-2200 M-F",fee:"42.59",note:""},
+{cat:"clinic",sub:"Callback: Inpatient",code:"03.05N",desc:"Inpt CB 0700-1700 M-F",fee:"74.13",note:""},
+{cat:"clinic",sub:"Callback: Inpatient",code:"03.05P",desc:"Inpt CB 1700-2200 M-F",fee:"111.20",note:""},
+{cat:"clinic",sub:"Callback: Inpatient",code:"03.05R",desc:"Inpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Inpatient",code:"03.05QA",desc:"Inpt CB 2200-2400",fee:"148.24",note:""},
+{cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
+
+// ── OB ──
+{cat:"ob",sub:"Labour Management",code:"85.5A",desc:"Medical Induction of Labour",fee:"120.21",note:"Max 2/24hr, 4/pregnancy"},
+{cat:"ob",sub:"Labour Management",code:"87.54A",desc:"Non-Stress Test (NST)",fee:"16.24",note:"Not if labour commenced"},
+{cat:"ob",sub:"Labour Management",code:"87.54B",desc:"Continuous Fetal Monitoring",fee:"63.41",note:"Internal or external"},
+{cat:"ob",sub:"Labour Management",code:"87.53A",desc:"Fetal Scalp Sampling",fee:"42.24",note:"+100% to delivery"},
+{cat:"ob",sub:"Labour Management",code:"13.99JA",desc:"Mx Complex Labour /15 min",fee:"31.41",note:"Max 8 units/pt/preg. FTP, multiples, PIH, HELLP, APH, PPROM"},
+{cat:"ob",sub:"Vaginal Delivery",code:"87.98A",desc:"SVD \u2014 Spontaneous Vaginal Delivery",fee:"471.09",note:""},
+{cat:"ob",sub:"Vaginal Delivery",code:"87.98C",desc:"VBAC",fee:"718.01",note:""},
+{cat:"ob",sub:"Vaginal Delivery",code:"87.98D",desc:"Multiple Birth (each additional)",fee:"159.20",note:"+100% to delivery"},
+{cat:"ob",sub:"Vaginal Delivery",code:"85.69C",desc:"Breech Delivery (assisted)",fee:"198.18",note:"+100% to delivery"},
+{cat:"ob",sub:"Vaginal Delivery",code:"84.21D",desc:"Operative Delivery (forceps/vacuum)",fee:"144.58",note:"+100% to delivery"},
+{cat:"ob",sub:"Vaginal Delivery",code:"85.69B",desc:"Shoulder Dystocia",fee:"133.54",note:"+100% to delivery"},
+{cat:"ob",sub:"Vaginal Delivery",code:"87.98B",desc:"Mx of Labour & Attempted Delivery",fee:"479.35",note:"Referring MD only"},
+{cat:"ob",sub:"Cesarean Section",code:"86.9C",desc:"Elective C/S (any approach)",fee:"513.33",note:""},
+{cat:"ob",sub:"Cesarean Section",code:"86.9D",desc:"C/S After Trial of Labour",fee:"718.01",note:""},
+{cat:"ob",sub:"Cesarean Section",code:"86.9B",desc:"Cesarean Hysterectomy",fee:"1,039.65",note:""},
+{cat:"ob",sub:"OB Lacerations",code:"87.72A",desc:"Cervical Laceration Repair",fee:"113.71",note:"+100% to delivery"},
+{cat:"ob",sub:"OB Lacerations",code:"87.82",desc:"3rd Degree Laceration",fee:"113.71",note:"+100% to delivery"},
+{cat:"ob",sub:"OB Lacerations",code:"87.89A",desc:"4th Degree Laceration",fee:"126.71",note:"+100% to delivery"},
+{cat:"ob",sub:"OB Lacerations",code:"87.89B",desc:"Extensive Vaginal Laceration",fee:"113.71",note:"Max 2 calls, +100%"},
+{cat:"ob",sub:"OB Lacerations",code:"87.92",desc:"PP Vulvar/Vaginal Hematoma",fee:"113.71",note:"+100% to delivery"},
+{cat:"ob",sub:"Postpartum",code:"87.99AA",desc:"Surgical Mx PPH (balloon/suture)",fee:"162.45",note:"+100% to delivery"},
+{cat:"ob",sub:"Postpartum",code:"87.99A",desc:"Non-Surgical Mx PPH",fee:"96.17",note:"+100% to delivery"},
+{cat:"ob",sub:"Postpartum",code:"87.6",desc:"Manual Removal Retained Placenta",fee:"113.71",note:"+100% to delivery"},
+{cat:"ob",sub:"Postpartum",code:"81.01D",desc:"PP/Missed D&C or D&A",fee:"155.95",note:""},
+{cat:"ob",sub:"Postpartum",code:"87.94C",desc:"Uterine Inversion \u2014 Manual",fee:"139.70",note:"+100% to delivery"},
+{cat:"ob",sub:"Postpartum",code:"87.93A",desc:"Uterine Inversion \u2014 Abd Approach",fee:"422.36",note:"+100% to delivery"},
+{cat:"ob",sub:"OB Procedures",code:"79.4C",desc:"Cerclage \u2014 Elective",fee:"178.69",note:""},
+{cat:"ob",sub:"OB Procedures",code:"79.4D",desc:"Cerclage \u2014 Emergency",fee:"240.42",note:""},
+{cat:"ob",sub:"OB Procedures",code:"81.96",desc:"Cerclage \u2014 Removal",fee:"58.48",note:"+100% to delivery"},
+{cat:"ob",sub:"OB Procedures",code:"87.29A",desc:"Termination (suction/D&C)",fee:"155.95",note:""},
+{cat:"ob",sub:"OB Procedures",code:"87.29B",desc:"Termination D&E (\u226512 wk)",fee:"269.66",note:""},
+{cat:"ob",sub:"OB Procedures",code:"87.3",desc:"Amniocentesis",fee:"103.97",note:""},
+{cat:"ob",sub:"OB Procedures",code:"87.55A",desc:"Chorionic Villus Sampling",fee:"113.71",note:""},
+{cat:"ob",sub:"OB Procedures",code:"85.91",desc:"External Cephalic Version",fee:"159.20",note:"\u226537 wk, Level II/III"},
+{cat:"ob",sub:"OB Procedures",code:"13.99JB",desc:"Medical Emergency Detention /15 min",fee:"",note:""},
+
+// ── GYNE ──
+{cat:"gyn",sub:"Major Gyne Surgery",code:"81.99A",desc:"Hysterectomy (any method)",fee:"666.03",note:""},
+{cat:"gyn",sub:"Major Gyne Surgery",code:"81.99AA",desc:"Bilat Salpingectomy at Hyst (risk reduction)",fee:"100.72",note:"x2 if bilateral"},
+{cat:"gyn",sub:"Major Gyne Surgery",code:"81.99C",desc:"Lap Radical Hyst + Bilat Lymph Node Dissection",fee:"2,089.06",note:""},
+{cat:"gyn",sub:"Major Gyne Surgery",code:"83.9A",desc:"Operations on Adnexa (any method)",fee:"393.12",note:"LVP50 if 2nd proc"},
+{cat:"gyn",sub:"Major Gyne Surgery",code:"79.3E",desc:"Excision of Cervical Stump",fee:"425.61",note:""},
+{cat:"gyn",sub:"Major Gyne Surgery",code:"78.99B",desc:"Tubal Sterilization (any method)",fee:"230.67",note:""},
+{cat:"gyn",sub:"Uterine Procedures",code:"81.09",desc:"D&C (Dilation & Curettage)",fee:"155.95",note:"Incl biopsy/polypectomy"},
+{cat:"gyn",sub:"Uterine Procedures",code:"80.81",desc:"Hysteroscopy",fee:"146.20",note:"Incl biopsy"},
+{cat:"gyn",sub:"Uterine Procedures",code:"80.19B",desc:"Vaginal Myomectomy",fee:"308.65",note:""},
+{cat:"gyn",sub:"Uterine Procedures",code:"80.19C",desc:"Abdominal Myomectomy",fee:"357.38",note:""},
+{cat:"gyn",sub:"Uterine Procedures",code:"80.19D",desc:"Endo Ablation \u2014 Rollerball/Resectoscope",fee:"441.85",note:"Incl hysteroscopy"},
+{cat:"gyn",sub:"Uterine Procedures",code:"80.19E",desc:"Global Ablation (non-hysteroscopic)",fee:"230.67",note:"Not with 80.81"},
+{cat:"gyn",sub:"Uterine Procedures",code:"80.19A",desc:"Correction Congenital Uterine Anomaly",fee:"308.65",note:""},
+{cat:"gyn",sub:"Uterine Procedures",code:"80.83B",desc:"Endometrial Biopsy",fee:"45.48",note:""},
+{cat:"gyn",sub:"Uterine Procedures",code:"80.85A",desc:"HSG (Hysterosalpingogram)",fee:"90.97",note:""},
+{cat:"gyn",sub:"Uterine Procedures",code:"81.8",desc:"IUD Insertion",fee:"71.48",note:""},
+{cat:"gyn",sub:"Uterine Procedures",code:"11.71A",desc:"IUD Removal",fee:"15.60",note:""},
+{cat:"gyn",sub:"Endo & Adhesions",code:"81.29B",desc:"Laparotomy for Endometriosis",fee:"389.87",note:""},
+{cat:"gyn",sub:"Endo & Adhesions",code:"81.29C",desc:"Lap Endo/Lysis of Adhesions /15 min",fee:"211.18",note:"Time-based"},
+{cat:"gyn",sub:"Endo & Adhesions",code:"66.83",desc:"Diagnostic Laparoscopy",fee:"228.93",note:"+/- biopsy"},
+{cat:"gyn",sub:"Ectopic & Tubes",code:"78.52C",desc:"Surgical Treatment Ectopic Pregnancy",fee:"396.37",note:""},
+{cat:"gyn",sub:"Ectopic & Tubes",code:"78.7A",desc:"Tubal Insufflation (Methylene Blue)",fee:"19.49",note:""},
+{cat:"gyn",sub:"Ectopic & Tubes",code:"87.0AA",desc:"Termination 13-20 wk / Ectopic (MTX)",fee:"159.20",note:""},
+{cat:"gyn",sub:"Cervix",code:"79.1A",desc:"Cone Biopsy",fee:"162.45",note:"Incl D&C"},
+{cat:"gyn",sub:"Cervix",code:"79.29E",desc:"Cervical Biopsy",fee:"45.48",note:"Not with other proc"},
+{cat:"gyn",sub:"Cervix",code:"79.29D",desc:"LEEP",fee:"149.45",note:""},
+{cat:"gyn",sub:"Cervix",code:"79.29C",desc:"CO2 Laser Therapy",fee:"149.45",note:""},
+{cat:"gyn",sub:"Cervix",code:"79.22",desc:"Cauterization of Cervical Lesion",fee:"45.48",note:"Incl biopsy"},
+{cat:"gyn",sub:"Cervix",code:"79.23A",desc:"Cryotherapy",fee:"44.86",note:"Incl biopsy"},
+{cat:"gyn",sub:"Cervix",code:"82.81A",desc:"Colposcopy",fee:"45.48",note:"Incl biopsy"},
+{cat:"gyn",sub:"Onc & Retroperitoneal",code:"66.3B",desc:"Retroperitoneal Tumor Excision",fee:"731.01",note:""},
+{cat:"gyn",sub:"Onc & Retroperitoneal",code:"66.3C",desc:"Retroperitoneal Tumor Biopsy",fee:"563.17",note:""},
+{cat:"gyn",sub:"Onc & Retroperitoneal",code:"66.3A",desc:"Omentectomy for CA (additional)",fee:"276.16",note:""},
+{cat:"gyn",sub:"Onc & Retroperitoneal",code:"77.99A",desc:"Ovarian CA Debulking (additional)",fee:"152.70",note:""},
+
+// ── PELVIC FLOOR ──
+{cat:"pelvic",sub:"Prolapse Repair",code:"82.41A",desc:"Cystocele Repair",fee:"337.89",note:"REPT +50%"},
+{cat:"pelvic",sub:"Prolapse Repair",code:"82.42A",desc:"Rectocele Repair",fee:"337.89",note:"REPT +50%"},
+{cat:"pelvic",sub:"Prolapse Repair",code:"82.69B",desc:"Enterocele Repair",fee:"337.89",note:"REPT +100%"},
+{cat:"pelvic",sub:"Prolapse Repair",code:"82.7A",desc:"Abdominal Sacrocolpopexy",fee:"666.03",note:"REPT +100%"},
+{cat:"pelvic",sub:"Prolapse Repair",code:"82.69C",desc:"Insertion of Prosthetic Mesh",fee:"68.23",note:"Add-on only"},
+{cat:"pelvic",sub:"Prolapse Repair",code:"82.64A",desc:"Vaginal Vault Suspension (additional)",fee:"276.16",note:"REPT +100%"},
+{cat:"pelvic",sub:"Prolapse Repair",code:"82.64B",desc:"Sacrospinous / Ileo-coccygeal Fixation",fee:"471.09",note:"LVP50 if 2nd proc"},
+{cat:"pelvic",sub:"Prolapse Repair",code:"82.3A",desc:"Colpocleisis (LeFort)",fee:"279.41",note:""},
+{cat:"pelvic",sub:"Prolapse Repair",code:"82.69D",desc:"Paravaginal Repair",fee:"425.61",note:"LVP50 if 2nd proc"},
+{cat:"pelvic",sub:"Prolapse Repair",code:"82.69E",desc:"Excision of Mesh/Graft /15 min",fee:"207.14",note:"Time-based"},
+{cat:"pelvic",sub:"Incontinence",code:"71.4A",desc:"TVT / Sling (Fascia Lata)",fee:"448.35",note:"REPT +100%"},
+{cat:"pelvic",sub:"Incontinence",code:"71.7A",desc:"Burch (Anterior Urethropexy)",fee:"422.36",note:"REPT +50%"},
+{cat:"pelvic",sub:"Incontinence",code:"71.7B",desc:"Repeat Incontinence Repair",fee:"578.31",note:"After failed surgery"},
+{cat:"pelvic",sub:"Incontinence",code:"70.4A",desc:"Release of Sling",fee:"581.56",note:"OB/GYN only"},
+{cat:"pelvic",sub:"Incontinence",code:"03.29A",desc:"Incontinence Testing (non-op)",fee:"11.27",note:""},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"83.09A",desc:"Perineal Abscess I&D / Marsupialization",fee:"146.20",note:""},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"83.19A",desc:"Bartholin's Gland Procedure",fee:"146.20",note:""},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"83.2B",desc:"Vulvar Excision/Destruction",fee:"146.20",note:"Not condylomata"},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"83.5A",desc:"Labial Reduction / Simple Vulvectomy",fee:"172.19",note:""},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"83.4A",desc:"Radical Vulvectomy",fee:"419.11",note:""},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"83.4B",desc:"Radical Vulvectomy + Gland Dissection",fee:"867.46",note:""},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"83.61",desc:"Perineorrhaphy",fee:"146.20",note:""},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"83.69B",desc:"Repair Old 3rd Degree Laceration",fee:"308.65",note:""},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"83.69C",desc:"Repair Vulvar/Vaginal Hematoma",fee:"152.70",note:""},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"83.7A",desc:"Biopsy of Vulva",fee:"45.48",note:"Max 3 calls"},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"82.91A",desc:"Biopsy of Vagina",fee:"45.48",note:"Max 3 calls"},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"82.61A",desc:"Repair Non-OB Laceration",fee:"142.95",note:"GA only"},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"82.63",desc:"Hymenorrhaphy",fee:"146.20",note:""},
+{cat:"pelvic",sub:"Vulva & Perineum",code:"82.51A",desc:"Vaginal Construction (congenital)",fee:"532.82",note:""},
+{cat:"pelvic",sub:"Condylomata",code:"98.12S",desc:"Non-Surgical Treatment of Condyloma",fee:"",note:""},
+{cat:"pelvic",sub:"Condylomata",code:"98.12T",desc:"Surgical Treatment of Condyloma",fee:"",note:""},
+{cat:"pelvic",sub:"Condylomata",code:"98.12U",desc:"Surgical Treatment Condyloma \u2014 GA",fee:"",note:""},
+{cat:"pelvic",sub:"Post-Op Wound",code:"66.51A",desc:"Complete Wound Closure Post-Op",fee:"531.29",note:""},
+{cat:"pelvic",sub:"Post-Op Wound",code:"66.51B",desc:"Superficial Wound Closure Post-Op",fee:"123.45",note:""},
+{cat:"pelvic",sub:"Post-Op Wound",code:"87.91",desc:"Evacuation of Incision Hematoma",fee:"38.99",note:""},
+
+// ── UROLOGY ──
+{cat:"uro",sub:"Cystoscopy & Bladder",code:"01.34",desc:"Cystoscopy (diagnostic)",fee:"",note:"Add-on to many gyne procs"},
+{cat:"uro",sub:"Cystoscopy & Bladder",code:"69.13C",desc:"Cystotomy \u2014 Open (suprapubic)",fee:"261.10",note:""},
+{cat:"uro",sub:"Cystoscopy & Bladder",code:"69.71",desc:"Suture of Bladder (traumatic)",fee:"522.19",note:""},
+{cat:"uro",sub:"Cystoscopy & Bladder",code:"69.73A",desc:"Vesicovaginal Fistula Repair",fee:"696.25",note:""},
+{cat:"uro",sub:"Cystoscopy & Bladder",code:"69.73C",desc:"Vesicovaginal Fistula \u2014 Transvesical",fee:"783.29",note:""},
+{cat:"uro",sub:"Cystoscopy & Bladder",code:"13.59M",desc:"Botox Injection (bladder)",fee:"",note:""},
+{cat:"uro",sub:"Cystoscopy & Bladder",code:"69.94",desc:"Insertion Indwelling Catheter",fee:"52.22",note:"Not with other proc"},
+{cat:"uro",sub:"Ureter",code:"71.02",desc:"Ureterolysis (retroperitoneal fibrosis)",fee:"454.85",note:""},
+{cat:"uro",sub:"Ureter",code:"71.02A",desc:"Ureterolysis for Malignancy",fee:"162.45",note:"Gyne onc surgery"},
+{cat:"uro",sub:"Ureter",code:"71.8",desc:"Ureteral Catheterization (stent)",fee:"139.25",note:"Incl cystoscopy"},
+{cat:"uro",sub:"Ureter",code:"68.99A",desc:"J-Stent Insertion",fee:"174.06",note:"Incl cystoscopy"},
+{cat:"uro",sub:"Ureter",code:"68.99B",desc:"J-Stent Removal",fee:"121.84",note:"Incl cystoscopy"},
+{cat:"uro",sub:"Ureter",code:"68.95",desc:"Ureteroscopy",fee:"261.10",note:"Incl cystoscopy"},
+{cat:"uro",sub:"Urethra",code:"70.33B",desc:"Urethrovaginal Fistula Repair",fee:"348.13",note:""},
+{cat:"uro",sub:"Urethra",code:"70.2B",desc:"Urethral Caruncle/Prolapse Excision",fee:"120.60",note:""},
+{cat:"uro",sub:"Urethra",code:"70.2C",desc:"Urethral Diverticulum Excision",fee:"261.10",note:""},
+{cat:"uro",sub:"Urethra",code:"70.5B",desc:"Dilation of Urethra (female)",fee:"17.41",note:""},
+
+// ── GEN SURG ──
+{cat:"surg",sub:"Hernia Repair",code:"65.61A",desc:"Incisional Hernia Repair (incl mesh)",fee:"860.69",note:"Not with bowel obstruction"},
+{cat:"surg",sub:"Hernia Repair",code:"65.49A",desc:"Umbilical/Epigastric Hernia Repair",fee:"377.22",note:""},
+{cat:"surg",sub:"Hernia Repair",code:"65.11A",desc:"Inguinal Hernia Repair (incl mesh)",fee:"451.60",note:""},
+{cat:"surg",sub:"Hernia Repair",code:"65.1A",desc:"Recurrent Inguinal/Femoral Hernia",fee:"664.12",note:""},
+{cat:"surg",sub:"Abdominal",code:"66.19A",desc:"Laparotomy (other)",fee:"394.31",note:"Not for hernia"},
+{cat:"surg",sub:"Abdominal",code:"66.19B",desc:"Drainage Intraperitoneal Abscess",fee:"499.42",note:""},
+{cat:"surg",sub:"Abdominal",code:"66.4A",desc:"Lysis of Adhesions /15 min",fee:"79.69",note:"Not with REDO modifier"},
+{cat:"surg",sub:"Abdominal",code:"66.83",desc:"Diagnostic Laparoscopy",fee:"228.93",note:"+/- biopsy"},
+{cat:"surg",sub:"Abdominal",code:"66.91A",desc:"Paracentesis",fee:"55.25",note:""},
+{cat:"surg",sub:"Miscellaneous",code:"17.71A",desc:"Pudendal Block",fee:"",note:""},
+{cat:"surg",sub:"Miscellaneous",code:"03.26",desc:"EUA (Exam Under Anesthesia)",fee:"41.60",note:"Trigger points"},
+{cat:"surg",sub:"Miscellaneous",code:"10.16A",desc:"Pessary \u2014 1st Visit",fee:"50.90",note:""},
+{cat:"surg",sub:"Miscellaneous",code:"10.16B",desc:"Pessary \u2014 Replace/Remove",fee:"13.41",note:""},
+{cat:"surg",sub:"Miscellaneous",code:"13.99BA",desc:"Pap Smear",fee:"",note:""},
+{cat:"surg",sub:"Miscellaneous",code:"99.09M",desc:"Morcellation",fee:"",note:""},
+{cat:"surg",sub:"Miscellaneous",code:"82.14D",desc:"Speculum Exam",fee:"139.70",note:""},
+];
+
+const COMBOS = [
+{name:"TAH + BSO",codes:"81.99A + 83.9A (x2 bilat) + 81.99AA"},
+{name:"TAH + BSO + Vault Susp",codes:"81.99A + 83.9A + 82.64A"},
+{name:"Sacrocolpopexy + Mesh",codes:"82.7A + 82.69C"},
+{name:"TVT Sling + Mesh",codes:"71.4A + 82.69C"},
+{name:"Ant + Post Repair",codes:"82.41A + 82.42A (LVP50 for 2nd)"},
+{name:"Ant/Post + Enterocele",codes:"82.41A + 82.42A + 82.69B"},
+{name:"C/S after TOL + Complex",codes:"86.9D + 13.99JA (/15 min, max 8)"},
+{name:"SVD + 3rd Degree + PPH",codes:"87.98A + 87.82 + 87.99A (or 87.99AA)"},
+{name:"Hysteroscopy + D&C",codes:"81.09 (80.81 included)"},
+{name:"Global Ablation + D&C",codes:"80.19E + 81.09"},
+{name:"Lap Endo (1 hr)",codes:"81.29C x4"},
+{name:"Gyne Onc: Hyst + Oment + Ureterolysis",codes:"81.99A + 66.3A + 71.02A"},
+];
+
+const MODIFIERS = [
+{code:"LVP50",desc:"50% procedural rate",when:"2nd proc through same incision"},
+{code:"LVP75",desc:"75% ANE rate",when:"ANE for 2nd/subsequent proc"},
+{code:"REPT",desc:"Repeat procedure",when:"Repeat surgery (check % per code)"},
+{code:"COINPT",desc:"Co-inpatient",when:"Add to 03.03AR"},
+{code:"BMISRG",desc:"BMI >35 surcharge",when:"Any surgical proc BMI >35"},
+{code:"HAEV",desc:"Admission evening",when:"1700-2200 M-F"},
+{code:"HAEVWK",desc:"Admission weekend",when:"0700-2200 Wk/Stat"},
+{code:"HANTPM",desc:"Admission night PM",when:"2200-2400"},
+{code:"HANTAM",desc:"Admission night AM",when:"2400-0700"},
+{code:"TEV",desc:"Surgical evening",when:"1700-2200 M-F"},
+{code:"TNTP",desc:"Surgical night PM",when:"2200-2400"},
+{code:"TNTA",desc:"Surgical night AM",when:"2400-0700"},
+{code:"TWK",desc:"Surgical weekend",when:"0700-2200 Wk"},
+{code:"TST",desc:"Surgical stat holiday",when:"0700-2200 Stat"},
+];
+
+const RULES = [
+"Most OB add-ons (lacerations, PPH, shoulder dystocia) are +100% to delivery regardless of who delivers.",
+"13.99JA (complex labour): Must be in hospital. Max 8 units/pt/pregnancy. For FTP, multiples, PIH/HELLP, APH, PPROM.",
+"81.29C (lap endo/lysis): Time-based /15 min. Cannot claim with C/S codes (86.9C or 86.9D).",
+"83.9A (adnexa): Cannot claim for sterilization alone. Use LVP50 if 2nd proc through same incision.",
+"81.99AA (salpingectomy at hyst): Ovarian cancer risk reduction only \u2014 one or both tubes.",
+"66.83 (diag lap): Cannot add if lap is integral part of proc, except with 81.09, 82.63, or 83.2B.",
+"Condylomata: Must use 98.12 series \u2014 not 83.2B or vulvar excision codes.",
+"82.69C (mesh): Add-on only. Must bill with specific primary codes (71.4A, 71.7A, 81.99A, 82.41A, etc.).",
+"70.4A (sling release): May only be claimed by OB/GYN.",
+"CMXV 20 = minor visit complexity; CMXC 30 = consult complexity.",
+"Cerclage removal (81.96): +100% to delivery regardless of who delivers.",
+"IOL (85.5A): Max 2 per 24hr, max 4 per pregnancy. If transferred, receiving MD can also claim.",
+"87.54B (fetal monitoring): Once per hospitalization unless transferred for higher level care.",
+];
+
+const CAT_LABELS = {
+  clinic: "Clinic & Visits",
+  ob: "Obstetrics",
+  gyn: "Gynecology",
+  pelvic: "Pelvic Floor & Urogyne",
+  uro: "Urology",
+  surg: "General Surgery"
+};
+const CAT_CLASS = {
+  clinic: "clinic", ob: "ob", gyn: "gyn",
+  pelvic: "pelvic", uro: "uro", surg: "surg"
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+let currentCat = 'all';
+let currentView = 'codes';
+let searchTerm = '';
+let favorites = JSON.parse(localStorage.getItem('obgyn_favs') || '[]');
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════════
+function render() {
+  const el = document.getElementById('content');
+  if (currentView === 'combos') return renderCombos(el);
+  if (currentView === 'modifiers') return renderModifiers(el);
+  if (currentView === 'rules') return renderRules(el);
+  renderCodes(el);
+}
+
+function highlightText(text, term) {
+  if (!term) return text;
+  const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  return text.replace(regex, '<mark>$1</mark>');
+}
+
+function renderCodes(el) {
+  let codes = ALL_CODES;
+
+  // Filter by category
+  if (currentCat === 'favs') {
+    codes = codes.filter(c => favorites.includes(c.code));
+  } else if (currentCat !== 'all') {
+    codes = codes.filter(c => c.cat === currentCat);
+  }
+
+  // Filter by search
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    codes = codes.filter(c =>
+      c.code.toLowerCase().includes(q) ||
+      c.desc.toLowerCase().includes(q) ||
+      (c.note && c.note.toLowerCase().includes(q)) ||
+      c.sub.toLowerCase().includes(q)
+    );
+  }
+
+  if (codes.length === 0) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="icon">${currentCat === 'favs' ? '\u2606' : '\uD83D\uDD0D'}</div>
+      <h3>${currentCat === 'favs' ? 'No Favorites Yet' : 'No Results'}</h3>
+      <p>${currentCat === 'favs' ? 'Tap the star on any code to save it here' : 'Try a different search term'}</p>
+    </div>`;
+    return;
+  }
+
+  // Group by cat then sub
+  let html = '';
+  if (searchTerm) {
+    html += `<div class="results-count">${codes.length} result${codes.length !== 1 ? 's' : ''}</div>`;
+  }
+
+  let lastCat = '', lastSub = '';
+  for (const c of codes) {
+    if (c.cat !== lastCat && (currentCat === 'all' || currentCat === 'favs')) {
+      html += `<div class="section-header ${CAT_CLASS[c.cat]}">${CAT_LABELS[c.cat]}</div>`;
+      lastCat = c.cat;
+      lastSub = '';
+    }
+    if (c.sub !== lastSub) {
+      html += `<div class="subsection">${searchTerm ? highlightText(c.sub, searchTerm) : c.sub}</div>`;
+      lastSub = c.sub;
+    }
+    const isFav = favorites.includes(c.code);
+    const ht = searchTerm ? highlightText : (t) => t;
+    html += `<div class="code-card" id="card-${c.code.replace(/[.\s]/g,'')}">
+      <div class="code-left">
+        <div class="code-num">${ht(c.code, searchTerm)}</div>
+        ${c.fee ? `<div class="code-fee">$${ht(c.fee, searchTerm)}</div>` : ''}
+      </div>
+      <div class="code-mid">
+        <div class="code-desc">${ht(c.desc, searchTerm)}</div>
+        ${c.note ? `<div class="code-note">${ht(c.note, searchTerm)}</div>` : ''}
+      </div>
+      <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav('${c.code}',event)">${isFav ? '\u2605' : '\u2606'}</button>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderCombos(el) {
+  let combos = COMBOS;
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    combos = combos.filter(c => c.name.toLowerCase().includes(q) || c.codes.toLowerCase().includes(q));
+  }
+  let html = '<div class="section-header combos">Billing Combos</div>';
+  if (combos.length === 0) {
+    html += '<div class="empty-state"><h3>No matching combos</h3></div>';
+  }
+  for (const c of combos) {
+    html += `<div class="combo-card">
+      <div class="combo-name">${searchTerm ? highlightText(c.name, searchTerm) : c.name}</div>
+      <div class="combo-codes">${searchTerm ? highlightText(c.codes, searchTerm) : c.codes}</div>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderModifiers(el) {
+  let mods = MODIFIERS;
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    mods = mods.filter(m => m.code.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q) || m.when.toLowerCase().includes(q));
+  }
+  let html = '<div class="section-header combos">Modifiers Reference</div>';
+  for (const m of mods) {
+    html += `<div class="mod-card">
+      <div class="mod-code">${searchTerm ? highlightText(m.code, searchTerm) : m.code}</div>
+      <div class="mod-desc">${searchTerm ? highlightText(m.desc, searchTerm) : m.desc}</div>
+      <div class="mod-when">${searchTerm ? highlightText(m.when, searchTerm) : m.when}</div>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderRules(el) {
+  let html = '<div class="section-header combos">Key Billing Rules</div>';
+  for (let i = 0; i < RULES.length; i++) {
+    const rule = searchTerm ? highlightText(RULES[i], searchTerm) : RULES[i];
+    if (searchTerm && !RULES[i].toLowerCase().includes(searchTerm.toLowerCase())) continue;
+    html += `<div class="combo-card"><div class="combo-codes"><b>${i+1}.</b> ${rule}</div></div>`;
+  }
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════════════════════════════
+function filterCat(cat, btn) {
+  currentCat = cat;
+  currentView = cat === 'combos' ? 'combos' : 'codes';
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  // Sync tab bar
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  if (cat === 'combos') {
+    document.querySelectorAll('.tab-item')[1].classList.add('active');
+  } else {
+    document.querySelectorAll('.tab-item')[0].classList.add('active');
+  }
+  render();
+  window.scrollTo({top: 0});
+}
+
+function switchView(view, btn) {
+  currentView = view;
+  if (view === 'codes') currentCat = 'all';
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  // Reset cat tabs
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  if (view === 'codes') document.querySelector('.cat-tab[data-cat="all"]').classList.add('active');
+  render();
+  window.scrollTo({top: 0});
+}
+
+function toggleFav(code, e) {
+  e.stopPropagation();
+  const idx = favorites.indexOf(code);
+  if (idx === -1) favorites.push(code);
+  else favorites.splice(idx, 1);
+  localStorage.setItem('obgyn_favs', JSON.stringify(favorites));
+  render();
+}
+
+function clearSearch() {
+  document.getElementById('search').value = '';
+  searchTerm = '';
+  document.getElementById('clearSearch').style.display = 'none';
+  render();
+}
+
+// Search with debounce
+let searchTimeout;
+document.getElementById('search').addEventListener('input', function(e) {
+  clearTimeout(searchTimeout);
+  const val = e.target.value.trim();
+  document.getElementById('clearSearch').style.display = val ? 'block' : 'none';
+  searchTimeout = setTimeout(() => {
+    searchTerm = val;
+    render();
+  }, 150);
+});
+
+// Back to top button
+window.addEventListener('scroll', () => {
+  document.getElementById('backToTop').style.display = window.scrollY > 400 ? 'flex' : 'none';
+});
+
+// Initial render
+render();
+
+// Register service worker for offline
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
