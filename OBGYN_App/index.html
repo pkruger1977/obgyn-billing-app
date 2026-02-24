@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="OB/GYN Codes">
 <meta name="theme-color" content="#1B2A4A">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -380,7 +380,23 @@ mark {
   padding: 6px 0;
 }
 
-/* Dark mode disabled – always use light theme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --card: #1C1C1E;
+    --text: #F5F5F7;
+    --text2: #98989D;
+    --border: #38383A;
+    --search-bg: #1C1C1E;
+  }
+  .header { background: rgba(0,0,0,0.85); }
+  .tab-bar { background: rgba(28,28,30,0.94); }
+  #search { background: #2C2C2E; color: #F5F5F7; }
+  .code-card:active { background: #2C2C2E; }
+  .tip-box { background: #1C1C1E; }
+  .tip-box.teal { background: #1C1C1E; }
+  .tip-box.purple { background: #1C1C1E; }
+}
 </style>
 </head>
 <body>
