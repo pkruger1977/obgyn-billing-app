@@ -4,8 +4,8 @@
   "description": "Quick reference for OB/GYN, Urology & General Surgery billing codes (Alberta AHCIP)",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#7c3aed",
+  "background_color": "#F5F5F7",
+  "theme_color": "#1B2A4A",
   "orientation": "portrait",
   "icons": [
     {
