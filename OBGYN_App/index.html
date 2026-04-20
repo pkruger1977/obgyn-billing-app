@@ -494,7 +494,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03MA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -737,7 +737,7 @@ function renderCodes(el) {
 
   // Filter by category
   if (currentCat === 'favs') {
-    codes = codes.filter(c => favorites.includes(c.code));
+    codes = codes.filter(c => favorites.includes(`${c.cat}-${c.code}`));
   } else if (currentCat !== 'all') {
     codes = codes.filter(c => c.cat === currentCat);
   }
@@ -779,9 +779,11 @@ function renderCodes(el) {
       html += `<div class="subsection">${searchTerm ? highlightText(c.sub, searchTerm) : c.sub}</div>`;
       lastSub = c.sub;
     }
-    const isFav = favorites.includes(c.code);
+    const favKey = `${c.cat}-${c.code}`;
+    const isFav = favorites.includes(favKey);
     const ht = searchTerm ? highlightText : (t) => t;
-    html += `<div class="code-card" id="card-${c.code.replace(/[.\s]/g,'')}">
+    const cardId = `${c.cat}-${c.code}`.replace(/[.\s]/g,'');
+    html += `<div class="code-card" id="card-${cardId}">
       <div class="code-left">
         <div class="code-num">${ht(c.code, searchTerm)}</div>
         ${c.fee ? `<div class="code-fee">$${ht(c.fee, searchTerm)}</div>` : ''}
@@ -790,7 +792,7 @@ function renderCodes(el) {
         <div class="code-desc">${ht(c.desc, searchTerm)}</div>
         ${c.note ? `<div class="code-note">${ht(c.note, searchTerm)}</div>` : ''}
       </div>
-      <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav('${c.code}',event)">${isFav ? '\u2605' : '\u2606'}</button>
+      <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav('${c.cat}-${c.code}',event)">${isFav ? '\u2605' : '\u2606'}</button>
     </div>`;
   }
   el.innerHTML = html;
@@ -822,6 +824,11 @@ function renderModifiers(el) {
     mods = mods.filter(m => m.code.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q) || m.when.toLowerCase().includes(q));
   }
   let html = '<div class="section-header combos">Modifiers Reference</div>';
+  if (mods.length === 0) {
+    html += '<div class="empty-state"><h3>No matching modifiers</h3></div>';
+    el.innerHTML = html;
+    return;
+  }
   for (const m of mods) {
     html += `<div class="mod-card">
       <div class="mod-code">${searchTerm ? highlightText(m.code, searchTerm) : m.code}</div>
