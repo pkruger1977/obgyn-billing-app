@@ -13,6 +13,7 @@
 <style>
 :root {
   --navy: #1B2A4A;
+  --navy-bg: #1B2A4A;
   --blue: #2C5F8A;
   --teal: #1A8A7D;
   --coral: #D4564E;
@@ -132,14 +133,14 @@ body {
   color: var(--text2);
   transition: all 0.2s;
 }
-.cat-tab.active { background: var(--navy); color: white; }
+.cat-tab.active { background: var(--navy-bg); color: white; }
 .cat-tab[data-cat="ob"].active { background: var(--purple); }
 .cat-tab[data-cat="gyn"].active { background: var(--blue); }
 .cat-tab[data-cat="pelvic"].active { background: var(--teal); }
 .cat-tab[data-cat="uro"].active { background: var(--teal); }
 .cat-tab[data-cat="surg"].active { background: var(--coral); }
 .cat-tab[data-cat="clinic"].active { background: var(--gold); }
-.cat-tab[data-cat="combos"].active { background: var(--navy); }
+.cat-tab[data-cat="combos"].active { background: var(--navy-bg); }
 .cat-tab[data-cat="favs"].active { background: #FF3B30; }
 
 /* ─── CONTENT ─── */
@@ -162,7 +163,7 @@ body {
 .section-header.uro { background: var(--teal); }
 .section-header.surg { background: var(--coral); }
 .section-header.clinic { background: var(--gold); }
-.section-header.combos { background: var(--navy); }
+.section-header.combos { background: var(--navy-bg); }
 
 .subsection {
   font-size: 14px;
@@ -352,7 +353,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--navy);
+  background: var(--navy-bg);
   color: white;
   border: none;
   font-size: 18px;
@@ -389,6 +390,7 @@ mark {
     --text2: #98989D;
     --border: #38383A;
     --search-bg: #1C1C1E;
+    --navy-bg: #2A3F5F;
   }
   .header { background: rgba(0,0,0,0.85); }
   .tab-bar { background: rgba(28,28,30,0.94); }
@@ -494,7 +496,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LB",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""}, // was duplicate 03.03LA — verify against SOMB schedule
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -781,7 +783,7 @@ function renderCodes(el) {
     }
     const isFav = favorites.includes(c.code);
     const ht = searchTerm ? highlightText : (t) => t;
-    html += `<div class="code-card" id="card-${c.code.replace(/[.\s]/g,'')}">
+    html += `<div class="code-card">
       <div class="code-left">
         <div class="code-num">${ht(c.code, searchTerm)}</div>
         ${c.fee ? `<div class="code-fee">$${ht(c.fee, searchTerm)}</div>` : ''}
@@ -822,6 +824,9 @@ function renderModifiers(el) {
     mods = mods.filter(m => m.code.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q) || m.when.toLowerCase().includes(q));
   }
   let html = '<div class="section-header combos">Modifiers Reference</div>';
+  if (mods.length === 0) {
+    html += '<div class="empty-state"><h3>No matching modifiers</h3></div>';
+  }
   for (const m of mods) {
     html += `<div class="mod-card">
       <div class="mod-code">${searchTerm ? highlightText(m.code, searchTerm) : m.code}</div>
@@ -834,10 +839,15 @@ function renderModifiers(el) {
 
 function renderRules(el) {
   let html = '<div class="section-header combos">Key Billing Rules</div>';
+  let count = 0;
   for (let i = 0; i < RULES.length; i++) {
-    const rule = searchTerm ? highlightText(RULES[i], searchTerm) : RULES[i];
     if (searchTerm && !RULES[i].toLowerCase().includes(searchTerm.toLowerCase())) continue;
+    const rule = searchTerm ? highlightText(RULES[i], searchTerm) : RULES[i];
     html += `<div class="combo-card"><div class="combo-codes"><b>${i+1}.</b> ${rule}</div></div>`;
+    count++;
+  }
+  if (count === 0) {
+    html += '<div class="empty-state"><h3>No matching rules</h3></div>';
   }
   el.innerHTML = html;
 }
@@ -869,6 +879,7 @@ function switchView(view, btn) {
   // Reset cat tabs
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
   if (view === 'codes') document.querySelector('.cat-tab[data-cat="all"]').classList.add('active');
+  if (view === 'combos') document.querySelector('.cat-tab[data-cat="combos"]').classList.add('active');
   render();
   window.scrollTo({top: 0});
 }
