@@ -397,6 +397,10 @@ mark {
   .tip-box { background: #1C1C1E; }
   .tip-box.teal { background: #1C1C1E; }
   .tip-box.purple { background: #1C1C1E; }
+  .cat-tab.active { background: #1B2A4A; }
+  .cat-tab[data-cat="combos"].active { background: #1B2A4A; }
+  .section-header.combos { background: #1B2A4A; }
+  #backToTop { background: #1B2A4A; }
 }
 </style>
 </head>
@@ -737,7 +741,7 @@ function renderCodes(el) {
 
   // Filter by category
   if (currentCat === 'favs') {
-    codes = codes.filter(c => favorites.includes(c.code));
+    codes = codes.filter(c => favorites.includes(c.cat + ':' + c.code));
   } else if (currentCat !== 'all') {
     codes = codes.filter(c => c.cat === currentCat);
   }
@@ -779,9 +783,9 @@ function renderCodes(el) {
       html += `<div class="subsection">${searchTerm ? highlightText(c.sub, searchTerm) : c.sub}</div>`;
       lastSub = c.sub;
     }
-    const isFav = favorites.includes(c.code);
+    const isFav = favorites.includes(c.cat + ':' + c.code);
     const ht = searchTerm ? highlightText : (t) => t;
-    html += `<div class="code-card" id="card-${c.code.replace(/[.\s]/g,'')}">
+    html += `<div class="code-card" id="card-${c.cat}-${c.code.replace(/[.\s]/g,'')}">
       <div class="code-left">
         <div class="code-num">${ht(c.code, searchTerm)}</div>
         ${c.fee ? `<div class="code-fee">$${ht(c.fee, searchTerm)}</div>` : ''}
@@ -790,7 +794,7 @@ function renderCodes(el) {
         <div class="code-desc">${ht(c.desc, searchTerm)}</div>
         ${c.note ? `<div class="code-note">${ht(c.note, searchTerm)}</div>` : ''}
       </div>
-      <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav('${c.code}',event)">${isFav ? '\u2605' : '\u2606'}</button>
+      <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav('${c.cat}','${c.code}',event)">${isFav ? '\u2605' : '\u2606'}</button>
     </div>`;
   }
   el.innerHTML = html;
@@ -873,10 +877,11 @@ function switchView(view, btn) {
   window.scrollTo({top: 0});
 }
 
-function toggleFav(code, e) {
+function toggleFav(cat, code, e) {
   e.stopPropagation();
-  const idx = favorites.indexOf(code);
-  if (idx === -1) favorites.push(code);
+  const key = cat + ':' + code;
+  const idx = favorites.indexOf(key);
+  if (idx === -1) favorites.push(key);
   else favorites.splice(idx, 1);
   localStorage.setItem('obgyn_favs', JSON.stringify(favorites));
   render();
