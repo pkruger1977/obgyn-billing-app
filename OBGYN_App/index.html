@@ -24,6 +24,7 @@
   --text2: #6e6e73;
   --border: #E5E5EA;
   --search-bg: #E5E5EA;
+  --navy-bg: #1B2A4A;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --tab-height: 56px;
@@ -132,14 +133,14 @@ body {
   color: var(--text2);
   transition: all 0.2s;
 }
-.cat-tab.active { background: var(--navy); color: white; }
+.cat-tab.active { background: var(--navy-bg); color: white; }
 .cat-tab[data-cat="ob"].active { background: var(--purple); }
 .cat-tab[data-cat="gyn"].active { background: var(--blue); }
 .cat-tab[data-cat="pelvic"].active { background: var(--teal); }
 .cat-tab[data-cat="uro"].active { background: var(--teal); }
 .cat-tab[data-cat="surg"].active { background: var(--coral); }
 .cat-tab[data-cat="clinic"].active { background: var(--gold); }
-.cat-tab[data-cat="combos"].active { background: var(--navy); }
+.cat-tab[data-cat="combos"].active { background: var(--navy-bg); }
 .cat-tab[data-cat="favs"].active { background: #FF3B30; }
 
 /* ─── CONTENT ─── */
@@ -162,7 +163,7 @@ body {
 .section-header.uro { background: var(--teal); }
 .section-header.surg { background: var(--coral); }
 .section-header.clinic { background: var(--gold); }
-.section-header.combos { background: var(--navy); }
+.section-header.combos { background: var(--navy-bg); }
 
 .subsection {
   font-size: 14px;
@@ -352,7 +353,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--navy);
+  background: var(--navy-bg);
   color: white;
   border: none;
   font-size: 18px;
@@ -494,7 +495,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03MA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:"Verify code with AHCIP schedule"},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -850,6 +851,7 @@ function filterCat(cat, btn) {
   currentView = cat === 'combos' ? 'combos' : 'codes';
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
+  document.getElementById('catTabs').style.display = '';
   // Sync tab bar
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   if (cat === 'combos') {
@@ -866,9 +868,16 @@ function switchView(view, btn) {
   if (view === 'codes') currentCat = 'all';
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  // Reset cat tabs
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-  if (view === 'codes') document.querySelector('.cat-tab[data-cat="all"]').classList.add('active');
+  if (view === 'codes') {
+    document.querySelector('.cat-tab[data-cat="all"]').classList.add('active');
+    document.getElementById('catTabs').style.display = '';
+  } else if (view === 'combos') {
+    document.querySelector('.cat-tab[data-cat="combos"]').classList.add('active');
+    document.getElementById('catTabs').style.display = '';
+  } else {
+    document.getElementById('catTabs').style.display = 'none';
+  }
   render();
   window.scrollTo({top: 0});
 }
