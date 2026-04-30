@@ -397,6 +397,14 @@ mark {
   .tip-box { background: #1C1C1E; }
   .tip-box.teal { background: #1C1C1E; }
   .tip-box.purple { background: #1C1C1E; }
+  .section-header { color: #F5F5F7; }
+  .section-header.ob { background: var(--purple); }
+  .section-header.gyn { background: var(--blue); }
+  .section-header.pelvic { background: var(--teal); }
+  .section-header.uro { background: var(--teal); }
+  .section-header.surg { background: var(--coral); }
+  .section-header.clinic { background: var(--gold); }
+  .section-header.combos { background: #2C5F8A; }
 }
 </style>
 </head>
@@ -494,7 +502,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LB",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -635,7 +643,7 @@ const ALL_CODES = [
 {cat:"surg",sub:"Abdominal",code:"66.19A",desc:"Laparotomy (other)",fee:"394.31",note:"Not for hernia"},
 {cat:"surg",sub:"Abdominal",code:"66.19B",desc:"Drainage Intraperitoneal Abscess",fee:"499.42",note:""},
 {cat:"surg",sub:"Abdominal",code:"66.4A",desc:"Lysis of Adhesions /15 min",fee:"79.69",note:"Not with REDO modifier"},
-{cat:"surg",sub:"Abdominal",code:"66.83",desc:"Diagnostic Laparoscopy",fee:"228.93",note:"+/- biopsy"},
+{cat:"surg",sub:"Abdominal",code:"66.83A",desc:"Diagnostic Laparoscopy",fee:"228.93",note:"+/- biopsy"},
 {cat:"surg",sub:"Abdominal",code:"66.91A",desc:"Paracentesis",fee:"55.25",note:""},
 {cat:"surg",sub:"Miscellaneous",code:"17.71A",desc:"Pudendal Block",fee:"",note:""},
 {cat:"surg",sub:"Miscellaneous",code:"03.26",desc:"EUA (Exam Under Anesthesia)",fee:"41.60",note:"Trigger points"},
@@ -822,6 +830,11 @@ function renderModifiers(el) {
     mods = mods.filter(m => m.code.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q) || m.when.toLowerCase().includes(q));
   }
   let html = '<div class="section-header combos">Modifiers Reference</div>';
+  if (mods.length === 0) {
+    html += '<div class="empty-state"><h3>No matching modifiers</h3><p>Try a different search term</p></div>';
+    el.innerHTML = html;
+    return;
+  }
   for (const m of mods) {
     html += `<div class="mod-card">
       <div class="mod-code">${searchTerm ? highlightText(m.code, searchTerm) : m.code}</div>
