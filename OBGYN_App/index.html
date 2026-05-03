@@ -494,7 +494,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LB",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -720,9 +720,26 @@ let favorites = JSON.parse(localStorage.getItem('obgyn_favs') || '[]');
 // ═══════════════════════════════════════════════════════════════════
 function render() {
   const el = document.getElementById('content');
-  if (currentView === 'combos') return renderCombos(el);
-  if (currentView === 'modifiers') return renderModifiers(el);
-  if (currentView === 'rules') return renderRules(el);
+  const titleEl = document.getElementById('headerTitle');
+  const catTabs = document.getElementById('catTabs');
+
+  if (currentView === 'combos') {
+    titleEl.textContent = 'Billing Combos';
+    catTabs.style.display = 'none';
+    return renderCombos(el);
+  }
+  if (currentView === 'modifiers') {
+    titleEl.textContent = 'Modifiers';
+    catTabs.style.display = 'none';
+    return renderModifiers(el);
+  }
+  if (currentView === 'rules') {
+    titleEl.textContent = 'Billing Rules';
+    catTabs.style.display = 'none';
+    return renderRules(el);
+  }
+  titleEl.textContent = 'OB/GYN Codes';
+  catTabs.style.display = 'flex';
   renderCodes(el);
 }
 
@@ -780,15 +797,14 @@ function renderCodes(el) {
       lastSub = c.sub;
     }
     const isFav = favorites.includes(c.code);
-    const ht = searchTerm ? highlightText : (t) => t;
     html += `<div class="code-card" id="card-${c.code.replace(/[.\s]/g,'')}">
       <div class="code-left">
-        <div class="code-num">${ht(c.code, searchTerm)}</div>
-        ${c.fee ? `<div class="code-fee">$${ht(c.fee, searchTerm)}</div>` : ''}
+        <div class="code-num">${highlightText(c.code, searchTerm)}</div>
+        ${c.fee ? `<div class="code-fee">$${highlightText(c.fee, searchTerm)}</div>` : ''}
       </div>
       <div class="code-mid">
-        <div class="code-desc">${ht(c.desc, searchTerm)}</div>
-        ${c.note ? `<div class="code-note">${ht(c.note, searchTerm)}</div>` : ''}
+        <div class="code-desc">${highlightText(c.desc, searchTerm)}</div>
+        ${c.note ? `<div class="code-note">${highlightText(c.note, searchTerm)}</div>` : ''}
       </div>
       <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav('${c.code}',event)">${isFav ? '\u2605' : '\u2606'}</button>
     </div>`;
@@ -822,11 +838,14 @@ function renderModifiers(el) {
     mods = mods.filter(m => m.code.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q) || m.when.toLowerCase().includes(q));
   }
   let html = '<div class="section-header combos">Modifiers Reference</div>';
+  if (mods.length === 0) {
+    html += '<div class="empty-state"><div class="icon">🔍</div><h3>No Matching Modifiers</h3><p>Try a different search term</p></div>';
+  }
   for (const m of mods) {
     html += `<div class="mod-card">
-      <div class="mod-code">${searchTerm ? highlightText(m.code, searchTerm) : m.code}</div>
-      <div class="mod-desc">${searchTerm ? highlightText(m.desc, searchTerm) : m.desc}</div>
-      <div class="mod-when">${searchTerm ? highlightText(m.when, searchTerm) : m.when}</div>
+      <div class="mod-code">${highlightText(m.code, searchTerm)}</div>
+      <div class="mod-desc">${highlightText(m.desc, searchTerm)}</div>
+      <div class="mod-when">${highlightText(m.when, searchTerm)}</div>
     </div>`;
   }
   el.innerHTML = html;
@@ -834,10 +853,16 @@ function renderModifiers(el) {
 
 function renderRules(el) {
   let html = '<div class="section-header combos">Key Billing Rules</div>';
-  for (let i = 0; i < RULES.length; i++) {
-    const rule = searchTerm ? highlightText(RULES[i], searchTerm) : RULES[i];
-    if (searchTerm && !RULES[i].toLowerCase().includes(searchTerm.toLowerCase())) continue;
-    html += `<div class="combo-card"><div class="combo-codes"><b>${i+1}.</b> ${rule}</div></div>`;
+  let filtered = RULES;
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    filtered = RULES.filter(r => r.toLowerCase().includes(q));
+  }
+  if (filtered.length === 0) {
+    html += '<div class="empty-state"><div class="icon">🔍</div><h3>No Matching Rules</h3><p>Try a different search term</p></div>';
+  }
+  for (let i = 0; i < filtered.length; i++) {
+    html += `<div class="combo-card"><div class="combo-codes"><b>${i+1}.</b> ${highlightText(filtered[i], searchTerm)}</div></div>`;
   }
   el.innerHTML = html;
 }
