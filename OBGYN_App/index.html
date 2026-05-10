@@ -494,7 +494,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03MA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -864,11 +864,12 @@ function filterCat(cat, btn) {
 function switchView(view, btn) {
   currentView = view;
   if (view === 'codes') currentCat = 'all';
+  if (view === 'combos') currentCat = 'combos';
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  // Reset cat tabs
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
   if (view === 'codes') document.querySelector('.cat-tab[data-cat="all"]').classList.add('active');
+  if (view === 'combos') document.querySelector('.cat-tab[data-cat="combos"]').classList.add('active');
   render();
   window.scrollTo({top: 0});
 }
