@@ -383,6 +383,7 @@ mark {
 @media (prefers-color-scheme: dark) {
   :root {
     --navy: #F5F5F7;
+    --navy-bg: #1B2A4A;
     --bg: #000000;
     --card: #1C1C1E;
     --text: #F5F5F7;
@@ -397,6 +398,10 @@ mark {
   .tip-box { background: #1C1C1E; }
   .tip-box.teal { background: #1C1C1E; }
   .tip-box.purple { background: #1C1C1E; }
+  .section-header.combos { background: var(--navy-bg); }
+  .cat-tab.active { background: var(--navy-bg); }
+  .cat-tab[data-cat="combos"].active { background: var(--navy-bg); }
+  .cat-tab[data-cat="favs"].active { background: #FF3B30; }
 }
 </style>
 </head>
@@ -494,7 +499,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03MA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -822,6 +827,9 @@ function renderModifiers(el) {
     mods = mods.filter(m => m.code.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q) || m.when.toLowerCase().includes(q));
   }
   let html = '<div class="section-header combos">Modifiers Reference</div>';
+  if (mods.length === 0) {
+    html += '<div class="empty-state"><h3>No matching modifiers</h3></div>';
+  }
   for (const m of mods) {
     html += `<div class="mod-card">
       <div class="mod-code">${searchTerm ? highlightText(m.code, searchTerm) : m.code}</div>
@@ -834,10 +842,15 @@ function renderModifiers(el) {
 
 function renderRules(el) {
   let html = '<div class="section-header combos">Key Billing Rules</div>';
+  let matchCount = 0;
   for (let i = 0; i < RULES.length; i++) {
-    const rule = searchTerm ? highlightText(RULES[i], searchTerm) : RULES[i];
     if (searchTerm && !RULES[i].toLowerCase().includes(searchTerm.toLowerCase())) continue;
+    matchCount++;
+    const rule = searchTerm ? highlightText(RULES[i], searchTerm) : RULES[i];
     html += `<div class="combo-card"><div class="combo-codes"><b>${i+1}.</b> ${rule}</div></div>`;
+  }
+  if (matchCount === 0) {
+    html += '<div class="empty-state"><h3>No matching rules</h3></div>';
   }
   el.innerHTML = html;
 }
