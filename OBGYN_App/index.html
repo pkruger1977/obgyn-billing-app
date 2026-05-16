@@ -397,6 +397,8 @@ mark {
   .tip-box { background: #1C1C1E; }
   .tip-box.teal { background: #1C1C1E; }
   .tip-box.purple { background: #1C1C1E; }
+  .section-header.combos { background: #2C5F8A; }
+  .subsection { color: #F5F5F7; }
 }
 </style>
 </head>
@@ -483,7 +485,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Phone: Inpatient",code:"03.01NH",desc:"Inpatient 1700-2200 M-F",fee:"20.28",note:""},
 {cat:"clinic",sub:"Phone: Inpatient",code:"03.01NI",desc:"Inpatient 0700-2200 Wk/Stat",fee:"23.94",note:""},
 {cat:"clinic",sub:"Phone: Consultant",code:"03.01LJ",desc:"Consultant 0700-1700 M-F",fee:"16.45",note:""},
-{cat:"clinic",sub:"Phone: Consultant",code:"03.01LK",desc:"Consultant 1700-2200 M-F",fee:"113.40",note:""},
+{cat:"clinic",sub:"Phone: Consultant",code:"03.01LK",desc:"Consultant 1700-2200 M-F",fee:"31.40",note:""},
 {cat:"clinic",sub:"Phone: Consultant",code:"03.01LL",desc:"Consultant 0700-2200 Wk/Stat",fee:"41.42",note:""},
 {cat:"clinic",sub:"Phone: Referring",code:"03.01LG",desc:"Referring 0700-1700 M-F",fee:"34.43",note:""},
 {cat:"clinic",sub:"Phone: Referring",code:"03.01LH",desc:"Referring 1700-2200 M-F",fee:"42.59",note:""},
@@ -494,7 +496,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03MA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -864,11 +866,12 @@ function filterCat(cat, btn) {
 function switchView(view, btn) {
   currentView = view;
   if (view === 'codes') currentCat = 'all';
+  if (view === 'combos') currentCat = 'combos';
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  // Reset cat tabs
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
   if (view === 'codes') document.querySelector('.cat-tab[data-cat="all"]').classList.add('active');
+  if (view === 'combos') document.querySelector('.cat-tab[data-cat="combos"]').classList.add('active');
   render();
   window.scrollTo({top: 0});
 }
