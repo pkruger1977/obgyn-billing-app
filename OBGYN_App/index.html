@@ -494,7 +494,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LB",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -715,6 +715,18 @@ let currentView = 'codes';
 let searchTerm = '';
 let favorites = JSON.parse(localStorage.getItem('obgyn_favs') || '[]');
 
+// Migrate old favorites (plain code strings) to new format (cat:code)
+if (favorites.length && !favorites[0].includes(':')) {
+  const migrated = [];
+  for (const oldFav of favorites) {
+    for (const c of ALL_CODES) {
+      if (c.code === oldFav) migrated.push(c.cat + ':' + c.code);
+    }
+  }
+  favorites = migrated;
+  localStorage.setItem('obgyn_favs', JSON.stringify(favorites));
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════════════════════════════════
@@ -737,7 +749,7 @@ function renderCodes(el) {
 
   // Filter by category
   if (currentCat === 'favs') {
-    codes = codes.filter(c => favorites.includes(c.code));
+    codes = codes.filter(c => favorites.includes(c.cat + ':' + c.code));
   } else if (currentCat !== 'all') {
     codes = codes.filter(c => c.cat === currentCat);
   }
@@ -779,9 +791,10 @@ function renderCodes(el) {
       html += `<div class="subsection">${searchTerm ? highlightText(c.sub, searchTerm) : c.sub}</div>`;
       lastSub = c.sub;
     }
-    const isFav = favorites.includes(c.code);
+    const favKey = c.cat + ':' + c.code;
+    const isFav = favorites.includes(favKey);
     const ht = searchTerm ? highlightText : (t) => t;
-    html += `<div class="code-card" id="card-${c.code.replace(/[.\s]/g,'')}">
+    html += `<div class="code-card" id="card-${favKey.replace(/[.\s:]/g,'')}">
       <div class="code-left">
         <div class="code-num">${ht(c.code, searchTerm)}</div>
         ${c.fee ? `<div class="code-fee">$${ht(c.fee, searchTerm)}</div>` : ''}
@@ -790,7 +803,7 @@ function renderCodes(el) {
         <div class="code-desc">${ht(c.desc, searchTerm)}</div>
         ${c.note ? `<div class="code-note">${ht(c.note, searchTerm)}</div>` : ''}
       </div>
-      <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav('${c.code}',event)">${isFav ? '\u2605' : '\u2606'}</button>
+      <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav('${favKey}',event)">${isFav ? '\u2605' : '\u2606'}</button>
     </div>`;
   }
   el.innerHTML = html;
@@ -822,6 +835,11 @@ function renderModifiers(el) {
     mods = mods.filter(m => m.code.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q) || m.when.toLowerCase().includes(q));
   }
   let html = '<div class="section-header combos">Modifiers Reference</div>';
+  if (mods.length === 0) {
+    html += '<div class="empty-state"><h3>No matching modifiers</h3></div>';
+    el.innerHTML = html;
+    return;
+  }
   for (const m of mods) {
     html += `<div class="mod-card">
       <div class="mod-code">${searchTerm ? highlightText(m.code, searchTerm) : m.code}</div>
@@ -834,10 +852,15 @@ function renderModifiers(el) {
 
 function renderRules(el) {
   let html = '<div class="section-header combos">Key Billing Rules</div>';
+  let count = 0;
   for (let i = 0; i < RULES.length; i++) {
-    const rule = searchTerm ? highlightText(RULES[i], searchTerm) : RULES[i];
     if (searchTerm && !RULES[i].toLowerCase().includes(searchTerm.toLowerCase())) continue;
+    const rule = searchTerm ? highlightText(RULES[i], searchTerm) : RULES[i];
     html += `<div class="combo-card"><div class="combo-codes"><b>${i+1}.</b> ${rule}</div></div>`;
+    count++;
+  }
+  if (count === 0) {
+    html += '<div class="empty-state"><h3>No matching rules</h3></div>';
   }
   el.innerHTML = html;
 }
@@ -850,7 +873,7 @@ function filterCat(cat, btn) {
   currentView = cat === 'combos' ? 'combos' : 'codes';
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  // Sync tab bar
+  document.getElementById('catTabs').style.display = '';
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   if (cat === 'combos') {
     document.querySelectorAll('.tab-item')[1].classList.add('active');
@@ -866,9 +889,17 @@ function switchView(view, btn) {
   if (view === 'codes') currentCat = 'all';
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  // Reset cat tabs
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-  if (view === 'codes') document.querySelector('.cat-tab[data-cat="all"]').classList.add('active');
+  const catTabsEl = document.getElementById('catTabs');
+  if (view === 'codes') {
+    document.querySelector('.cat-tab[data-cat="all"]').classList.add('active');
+    catTabsEl.style.display = '';
+  } else if (view === 'combos') {
+    document.querySelector('.cat-tab[data-cat="combos"]').classList.add('active');
+    catTabsEl.style.display = '';
+  } else {
+    catTabsEl.style.display = 'none';
+  }
   render();
   window.scrollTo({top: 0});
 }
