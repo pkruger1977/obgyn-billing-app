@@ -494,7 +494,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LB",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -781,7 +781,8 @@ function renderCodes(el) {
     }
     const isFav = favorites.includes(c.code);
     const ht = searchTerm ? highlightText : (t) => t;
-    html += `<div class="code-card" id="card-${c.code.replace(/[.\s]/g,'')}">
+    const cardId = `card-${c.cat}-${c.code.replace(/[.\s]/g,'')}`;
+    html += `<div class="code-card" id="${cardId}">
       <div class="code-left">
         <div class="code-num">${ht(c.code, searchTerm)}</div>
         ${c.fee ? `<div class="code-fee">$${ht(c.fee, searchTerm)}</div>` : ''}
@@ -848,6 +849,7 @@ function renderRules(el) {
 function filterCat(cat, btn) {
   currentCat = cat;
   currentView = cat === 'combos' ? 'combos' : 'codes';
+  document.getElementById('catTabs').style.display = 'flex';
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   // Sync tab bar
@@ -868,7 +870,16 @@ function switchView(view, btn) {
   btn.classList.add('active');
   // Reset cat tabs
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-  if (view === 'codes') document.querySelector('.cat-tab[data-cat="all"]').classList.add('active');
+  const catTabsEl = document.getElementById('catTabs');
+  if (view === 'codes') {
+    catTabsEl.style.display = 'flex';
+    document.querySelector('.cat-tab[data-cat="all"]').classList.add('active');
+  } else if (view === 'combos') {
+    catTabsEl.style.display = 'flex';
+    document.querySelector('.cat-tab[data-cat="combos"]').classList.add('active');
+  } else {
+    catTabsEl.style.display = 'none';
+  }
   render();
   window.scrollTo({top: 0});
 }
