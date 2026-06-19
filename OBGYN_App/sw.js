@@ -1,4 +1,4 @@
-const CACHE_NAME = 'obgyn-billing-v1';
+const CACHE_NAME = 'obgyn-billing-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -25,9 +25,19 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch — serve from cache, fall back to network
+// Fetch — stale-while-revalidate: serve cached, then update cache from network
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
+    caches.open(CACHE_NAME).then(cache =>
+      cache.match(event.request).then(cached => {
+        const fetched = fetch(event.request).then(response => {
+          if (response && response.status === 200 && response.type === 'basic') {
+            cache.put(event.request, response.clone());
+          }
+          return response;
+        }).catch(() => cached);
+        return cached || fetched;
+      })
+    )
   );
 });
