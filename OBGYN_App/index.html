@@ -13,6 +13,7 @@
 <style>
 :root {
   --navy: #1B2A4A;
+  --navy-bg: #1B2A4A;
   --blue: #2C5F8A;
   --teal: #1A8A7D;
   --coral: #D4564E;
@@ -132,14 +133,14 @@ body {
   color: var(--text2);
   transition: all 0.2s;
 }
-.cat-tab.active { background: var(--navy); color: white; }
+.cat-tab.active { background: var(--navy-bg); color: white; }
 .cat-tab[data-cat="ob"].active { background: var(--purple); }
 .cat-tab[data-cat="gyn"].active { background: var(--blue); }
 .cat-tab[data-cat="pelvic"].active { background: var(--teal); }
 .cat-tab[data-cat="uro"].active { background: var(--teal); }
 .cat-tab[data-cat="surg"].active { background: var(--coral); }
 .cat-tab[data-cat="clinic"].active { background: var(--gold); }
-.cat-tab[data-cat="combos"].active { background: var(--navy); }
+.cat-tab[data-cat="combos"].active { background: var(--navy-bg); }
 .cat-tab[data-cat="favs"].active { background: #FF3B30; }
 
 /* ─── CONTENT ─── */
@@ -162,7 +163,7 @@ body {
 .section-header.uro { background: var(--teal); }
 .section-header.surg { background: var(--coral); }
 .section-header.clinic { background: var(--gold); }
-.section-header.combos { background: var(--navy); }
+.section-header.combos { background: var(--navy-bg); }
 
 .subsection {
   font-size: 14px;
@@ -352,7 +353,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--navy);
+  background: var(--navy-bg);
   color: white;
   border: none;
   font-size: 18px;
@@ -383,6 +384,7 @@ mark {
 @media (prefers-color-scheme: dark) {
   :root {
     --navy: #F5F5F7;
+    --navy-bg: #2C3E5A;
     --bg: #000000;
     --card: #1C1C1E;
     --text: #F5F5F7;
@@ -397,6 +399,7 @@ mark {
   .tip-box { background: #1C1C1E; }
   .tip-box.teal { background: #1C1C1E; }
   .tip-box.purple { background: #1C1C1E; }
+  mark { background: #B8860B; color: #F5F5F7; }
 }
 </style>
 </head>
@@ -483,7 +486,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Phone: Inpatient",code:"03.01NH",desc:"Inpatient 1700-2200 M-F",fee:"20.28",note:""},
 {cat:"clinic",sub:"Phone: Inpatient",code:"03.01NI",desc:"Inpatient 0700-2200 Wk/Stat",fee:"23.94",note:""},
 {cat:"clinic",sub:"Phone: Consultant",code:"03.01LJ",desc:"Consultant 0700-1700 M-F",fee:"16.45",note:""},
-{cat:"clinic",sub:"Phone: Consultant",code:"03.01LK",desc:"Consultant 1700-2200 M-F",fee:"113.40",note:""},
+{cat:"clinic",sub:"Phone: Consultant",code:"03.01LK",desc:"Consultant 1700-2200 M-F",fee:"113.40",note:"VERIFY: fee is 6.9x daytime rate vs ~2x for other groups"},
 {cat:"clinic",sub:"Phone: Consultant",code:"03.01LL",desc:"Consultant 0700-2200 Wk/Stat",fee:"41.42",note:""},
 {cat:"clinic",sub:"Phone: Referring",code:"03.01LG",desc:"Referring 0700-1700 M-F",fee:"34.43",note:""},
 {cat:"clinic",sub:"Phone: Referring",code:"03.01LH",desc:"Referring 1700-2200 M-F",fee:"42.59",note:""},
@@ -494,7 +497,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:"VERIFY: code duplicates 03.03LA above — check SOMB schedule"},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -713,7 +716,9 @@ const CAT_CLASS = {
 let currentCat = 'all';
 let currentView = 'codes';
 let searchTerm = '';
-let favorites = JSON.parse(localStorage.getItem('obgyn_favs') || '[]');
+let favorites;
+try { favorites = JSON.parse(localStorage.getItem('obgyn_favs') || '[]'); }
+catch { favorites = []; }
 
 // ═══════════════════════════════════════════════════════════════════
 // RENDER
@@ -834,10 +839,12 @@ function renderModifiers(el) {
 
 function renderRules(el) {
   let html = '<div class="section-header combos">Key Billing Rules</div>';
+  let num = 0;
   for (let i = 0; i < RULES.length; i++) {
-    const rule = searchTerm ? highlightText(RULES[i], searchTerm) : RULES[i];
     if (searchTerm && !RULES[i].toLowerCase().includes(searchTerm.toLowerCase())) continue;
-    html += `<div class="combo-card"><div class="combo-codes"><b>${i+1}.</b> ${rule}</div></div>`;
+    num++;
+    const rule = searchTerm ? highlightText(RULES[i], searchTerm) : RULES[i];
+    html += `<div class="combo-card"><div class="combo-codes"><b>${num}.</b> ${rule}</div></div>`;
   }
   el.innerHTML = html;
 }
