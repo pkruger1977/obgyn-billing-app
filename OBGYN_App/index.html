@@ -397,6 +397,9 @@ mark {
   .tip-box { background: #1C1C1E; }
   .tip-box.teal { background: #1C1C1E; }
   .tip-box.purple { background: #1C1C1E; }
+  .cat-tab.active { background: #2C3E5A; }
+  .section-header.combos { background: #2C3E5A; }
+  #backToTop { background: #2C3E5A; }
 }
 </style>
 </head>
@@ -645,6 +648,7 @@ const ALL_CODES = [
 {cat:"surg",sub:"Miscellaneous",code:"99.09M",desc:"Morcellation",fee:"",note:""},
 {cat:"surg",sub:"Miscellaneous",code:"82.14D",desc:"Speculum Exam",fee:"139.70",note:""},
 ];
+ALL_CODES.forEach((c, i) => c._id = i);
 
 const COMBOS = [
 {name:"TAH + BSO",codes:"81.99A + 83.9A (x2 bilat) + 81.99AA"},
@@ -713,7 +717,7 @@ const CAT_CLASS = {
 let currentCat = 'all';
 let currentView = 'codes';
 let searchTerm = '';
-let favorites = JSON.parse(localStorage.getItem('obgyn_favs') || '[]');
+let favorites = JSON.parse(localStorage.getItem('obgyn_favs_v2') || '[]');
 
 // ═══════════════════════════════════════════════════════════════════
 // RENDER
@@ -737,7 +741,7 @@ function renderCodes(el) {
 
   // Filter by category
   if (currentCat === 'favs') {
-    codes = codes.filter(c => favorites.includes(c.code));
+    codes = codes.filter(c => favorites.includes(c._id));
   } else if (currentCat !== 'all') {
     codes = codes.filter(c => c.cat === currentCat);
   }
@@ -779,7 +783,7 @@ function renderCodes(el) {
       html += `<div class="subsection">${searchTerm ? highlightText(c.sub, searchTerm) : c.sub}</div>`;
       lastSub = c.sub;
     }
-    const isFav = favorites.includes(c.code);
+    const isFav = favorites.includes(c._id);
     const ht = searchTerm ? highlightText : (t) => t;
     html += `<div class="code-card" id="card-${c.code.replace(/[.\s]/g,'')}">
       <div class="code-left">
@@ -790,7 +794,7 @@ function renderCodes(el) {
         <div class="code-desc">${ht(c.desc, searchTerm)}</div>
         ${c.note ? `<div class="code-note">${ht(c.note, searchTerm)}</div>` : ''}
       </div>
-      <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav('${c.code}',event)">${isFav ? '\u2605' : '\u2606'}</button>
+      <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav(${c._id},event)">${isFav ? '\u2605' : '\u2606'}</button>
     </div>`;
   }
   el.innerHTML = html;
@@ -822,6 +826,9 @@ function renderModifiers(el) {
     mods = mods.filter(m => m.code.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q) || m.when.toLowerCase().includes(q));
   }
   let html = '<div class="section-header combos">Modifiers Reference</div>';
+  if (mods.length === 0) {
+    html += '<div class="empty-state"><h3>No matching modifiers</h3></div>';
+  }
   for (const m of mods) {
     html += `<div class="mod-card">
       <div class="mod-code">${searchTerm ? highlightText(m.code, searchTerm) : m.code}</div>
@@ -873,12 +880,12 @@ function switchView(view, btn) {
   window.scrollTo({top: 0});
 }
 
-function toggleFav(code, e) {
+function toggleFav(id, e) {
   e.stopPropagation();
-  const idx = favorites.indexOf(code);
-  if (idx === -1) favorites.push(code);
+  const idx = favorites.indexOf(id);
+  if (idx === -1) favorites.push(id);
   else favorites.splice(idx, 1);
-  localStorage.setItem('obgyn_favs', JSON.stringify(favorites));
+  localStorage.setItem('obgyn_favs_v2', JSON.stringify(favorites));
   render();
 }
 
