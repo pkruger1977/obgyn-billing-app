@@ -397,6 +397,11 @@ mark {
   .tip-box { background: #1C1C1E; }
   .tip-box.teal { background: #1C1C1E; }
   .tip-box.purple { background: #1C1C1E; }
+  .cat-tab.active { background: #2C5F8A; }
+  .cat-tab[data-cat="combos"].active { background: #2C5F8A; }
+  .section-header.combos { background: #2C5F8A; }
+  #backToTop { background: #2C5F8A; }
+  mark { background: #5C4B00; color: #FFEB3B; }
 }
 </style>
 </head>
@@ -494,7 +499,7 @@ const ALL_CODES = [
 {cat:"clinic",sub:"Callback: Inpatient",code:"03.05QB",desc:"Inpt CB 2400-0700",fee:"143.23",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03KA",desc:"Outpt CB 0700-1700 M-F",fee:"74.13",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 1700-2200 M-F",fee:"111.20",note:""},
-{cat:"clinic",sub:"Callback: Outpatient",code:"03.03LA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
+{cat:"clinic",sub:"Callback: Outpatient",code:"03.03MA",desc:"Outpt CB 0700-2200 Wk/Stat",fee:"111.09",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MC",desc:"Outpt CB 2200-2400",fee:"143.24",note:""},
 {cat:"clinic",sub:"Callback: Outpatient",code:"03.03MD",desc:"Outpt CB 2400-0700",fee:"148.15",note:""},
 
@@ -713,7 +718,8 @@ const CAT_CLASS = {
 let currentCat = 'all';
 let currentView = 'codes';
 let searchTerm = '';
-let favorites = JSON.parse(localStorage.getItem('obgyn_favs') || '[]');
+let favorites = [];
+try { favorites = JSON.parse(localStorage.getItem('obgyn_favs') || '[]'); } catch(e) {}
 
 // ═══════════════════════════════════════════════════════════════════
 // RENDER
@@ -878,7 +884,7 @@ function toggleFav(code, e) {
   const idx = favorites.indexOf(code);
   if (idx === -1) favorites.push(code);
   else favorites.splice(idx, 1);
-  localStorage.setItem('obgyn_favs', JSON.stringify(favorites));
+  try { localStorage.setItem('obgyn_favs', JSON.stringify(favorites)); } catch(e) {}
   render();
 }
 
